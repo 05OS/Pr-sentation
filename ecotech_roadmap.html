@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoTech GmbH - CFO Roadmap & Series A Readiness</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Chosen Palette: Slate (Neutral/Professional), Red (Urgency/Burning Platform), Emerald (DD-Ready/Solutions), Blue (Action/Trust) -->
+    
+    <!-- Application Structure Plan: 
+    Das Design nutzt ein klassisches Dashboard-Layout mit einer seitlichen Navigation. 
+    Warum? Das Quellmaterial ist ein 5-Schritte-Fahrplan für eine Transformation. Ein Dashboard-Ansatz 
+    erlaubt es den Nutzern (den Co-Foundern), die dramatische Ausgangslage (KPIs im Dashboard) permanent 
+    im Blick zu haben, während sie sich durch die operativen Lösungs-Schritte navigieren. 
+    Interaktive Vorher/Nachher-Vergleiche und "Fix-it"-Buttons machen die Transformation vom "Chaos" zur 
+    "DD-Readiness" physisch erlebbar und unterstreichen die Hands-on-Mentalität der 80-20-Regel. 
+    -->
+    
+    <!-- Visualization & Content Choices: 
+    1. The Burning Platform (Dashboard) -> Ziel: Dringlichkeit aufzeigen -> Viz: Line Chart (Chart.js) zeigt den Cash-Burn auf 0 in 5 Monaten. Justification: Macht den "Runway" greifbar.
+    2. Rollenverteilung -> Ziel: Organisation/Klarheit -> Viz: HTML/CSS Flex-Cards mit Hover. Justification: Zeigt die klare Trennung CFO vs. Founder.
+    3. Prozesse (Rechnungen/Spesen) -> Ziel: Veränderung zeigen -> Viz: Interaktive "Vorher/Nachher" Toggles (JS). Justification: Verdeutlicht den extremen Kontrast zwischen aktuellem Chaos und künftiger Struktur.
+    4. Data Room -> Ziel: Organisation/Struktur -> Viz: Klickbare Ordner-Hierarchie (HTML/JS). Justification: Simuliert das Endprodukt für die Investorenprüfung.
+    -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        /* Mandatory Chart Container Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 35vh;
+            max-height: 350px;
+            min-height: 250px;
+        }
+        
+        /* Custom scrollbar for sidebar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased flex flex-col md:flex-row min-h-screen">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-slate-900 text-white p-4 flex justify-between items-center shadow-md z-20">
+        <div class="font-bold text-xl tracking-tight">EcoTech <span class="text-blue-400">CFO</span></div>
+        <button id="mobile-menu-btn" class="text-2xl focus:outline-none">☰</button>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <nav id="sidebar" class="bg-slate-900 text-slate-300 w-full md:w-72 flex-shrink-0 hidden md:flex flex-col shadow-xl z-10 transition-transform duration-300">
+        <div class="p-6 hidden md:block">
+            <h1 class="font-bold text-2xl text-white tracking-tight">EcoTech <span class="text-blue-400">CFO</span></h1>
+            <p class="text-xs text-slate-400 mt-1 uppercase tracking-wider">Series A Roadmap</p>
+        </div>
+        
+        <div class="flex flex-col gap-1 px-3 py-4 flex-grow overflow-y-auto">
+            <button onclick="navigate('dashboard')" id="nav-dashboard" class="nav-btn active flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 hover:text-white transition-colors bg-blue-600 text-white font-medium">
+                <span class="text-xl">📊</span> 0. The Burning Platform
+            </button>
+            <button onclick="navigate('roles')" id="nav-roles" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 hover:text-white transition-colors">
+                <span class="text-xl">👥</span> 1. Verantwortlichkeiten
+            </button>
+            <button onclick="navigate('ar-ap')" id="nav-ar-ap" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 hover:text-white transition-colors">
+                <span class="text-xl">💸</span> 2. Rechnungen & Freigaben
+            </button>
+            <button onclick="navigate('spend')" id="nav-spend" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 hover:text-white transition-colors">
+                <span class="text-xl">💳</span> 3. Spesen & Kreditkarten
+            </button>
+            <button onclick="navigate('accounting')" id="nav-accounting" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 hover:text-white transition-colors">
+                <span class="text-xl">⚖️</span> 4. Buchhaltung & Steuer
+            </button>
+            <button onclick="navigate('dataroom')" id="nav-dataroom" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-slate-800 hover:text-white transition-colors">
+                <span class="text-xl">🔒</span> 5. Investor Data Room
+            </button>
+        </div>
+
+        <div class="p-4 mt-auto border-t border-slate-700">
+            <div class="bg-slate-800 p-4 rounded-xl text-sm">
+                <p class="font-bold text-white mb-1">🏁 Ziel:</p>
+                <p class="text-emerald-400 font-bold text-lg">&gt; 3.0 Mio. € Series A</p>
+                <p class="text-xs mt-2 text-slate-400">Status: <span class="text-red-400">NICHT DD-Ready</span></p>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-8 lg:p-12 overflow-y-auto">
+        
+        <!-- ================= SECTION 0: DASHBOARD ================= -->
+        <section id="sec-dashboard" class="tab-content active">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">Management Summary</h2>
+                <p class="text-lg text-slate-600">Dieses Dashboard zeigt unsere akute Ausgangslage. Wir haben keine Zeit zu verlieren: Unsere kaufmännischen Prozesse sind in einem katastrophalen Zustand und gefährden unsere Series-A-Finanzierung unmittelbar.</p>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-2xl shadow-sm border border-red-100 p-6 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">⏳</div>
+                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Verbleibender Runway</h3>
+                    <div class="text-4xl font-black text-red-600 mb-2">&lt; 5 Monate</div>
+                    <p class="text-sm text-slate-600">Wir müssen sofort handeln.</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-orange-100 p-6 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🔥</div>
+                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Aktuelle Burn-Rate</h3>
+                    <div class="text-4xl font-black text-orange-600 mb-2">~80k € <span class="text-xl text-slate-400 font-medium">/ Monat</span></div>
+                    <p class="text-sm text-slate-600">Laufende Kosten verbrennen Reserven.</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-emerald-100 p-6 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🚀</div>
+                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Series-A Finanzierungsziel</h3>
+                    <div class="text-4xl font-black text-emerald-600 mb-2">&gt; 3.0 Mio. €</div>
+                    <p class="text-sm text-slate-600">Setzt 100% DD-Readiness voraus.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- The Burning Platform Chart -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">The Burning Platform: Cash-Verlauf</h3>
+                    <div class="chart-container">
+                        <canvas id="burnChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Call to Action -->
+                <div class="bg-slate-900 rounded-2xl shadow-sm border border-slate-800 p-6 text-white flex flex-col justify-center">
+                    <div class="text-4xl mb-4">⚠️</div>
+                    <h3 class="text-2xl font-bold mb-3">Wir sind derzeit NICHT Due-Diligence (DD) fähig.</h3>
+                    <ul class="space-y-3 mb-6 text-slate-300">
+                        <li class="flex items-start gap-2"><span>❌</span> Ausgangsrechnungen in Word (nicht §14 UStG konform)</li>
+                        <li class="flex items-start gap-2"><span>❌</span> Spesenabrechnungen unstrukturiert per E-Mail</li>
+                        <li class="flex items-start gap-2"><span>❌</span> Kreditkartendaten ungesichert im GDrive</li>
+                        <li class="flex items-start gap-2"><span>❌</span> Völlig unklare interne Zuständigkeiten</li>
+                    </ul>
+                    <button onclick="navigate('roles')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-lg mt-auto text-center">
+                        Transformation starten ➔
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 1: ROLES ================= -->
+        <section id="sec-roles" class="tab-content">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">1. Struktur Finanzteam & Verantwortlichkeiten</h2>
+                <p class="text-lg text-slate-600">Derzeit gibt es keine klaren Zuständigkeiten. Wir Gründer sind vom Prozess isoliert und erkennen unsere eigenen Zahlen in der BWA nicht. Hier definieren wir den "Neuen Deal", der euch entlastet und mir die Prozessverantwortung gibt.</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-6 text-center">Der neue Deal: Wer macht was?</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- CFO Card -->
+                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-6 relative hover:shadow-md transition-shadow">
+                        <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-lg">👔</div>
+                        <h4 class="text-lg font-bold text-blue-900 mt-4 mb-3 text-center">Der CFO (Process Owner)</h4>
+                        <ul class="space-y-3 text-blue-800">
+                            <li class="flex items-start gap-2"><span>✅</span> <strong>Alleinige Verantwortung:</strong> Zieht die Fäden in der gesamten Finanzabteilung.</li>
+                            <li class="flex items-start gap-2"><span>✅</span> <strong>Zentraler Ansprechpartner:</strong> Für Investoren, Steuerberater und Team.</li>
+                            <li class="flex items-start gap-2"><span>✅</span> <strong>Reporting:</strong> Bereitet monatlich verständliche, echte Daten auf.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Co-Founder Card -->
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-6 relative hover:shadow-md transition-shadow">
+                        <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-emerald-600 text-white w-10 h-10 rounded-full flex items-center justify-center text-xl shadow-lg">💡</div>
+                        <h4 class="text-lg font-bold text-emerald-900 mt-4 mb-3 text-center">Ihr als Co-Founder</h4>
+                        <ul class="space-y-3 text-emerald-800">
+                            <li class="flex items-start gap-2"><span>✅</span> <strong>Radikale Entlastung:</strong> Komplett befreit vom Suchen und Zuordnen von Belegen.</li>
+                            <li class="flex items-start gap-2"><span>✅</span> <strong>100% Produkt-Fokus:</strong> Konzentration auf Wachstum und Core-Business.</li>
+                            <li class="flex items-start gap-2"><span>✅</span> <strong>Gemeinsames Review:</strong> Strategische Entscheidungen im neuen monatlichen Finanz-Meeting auf Augenhöhe.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 text-white rounded-2xl p-6">
+                <h3 class="text-xl font-bold text-amber-400 mb-4">🏆 Die Goldenen Regeln (Zwingend für die Due Diligence)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-slate-800 p-4 rounded-lg">
+                        <h4 class="font-bold text-white mb-1">⏱️ Strikte Abgabefristen</h4>
+                        <p class="text-slate-300 text-sm">Kein Ignorieren mehr. Jedes Dokument muss sofort bei Erhalt digital weitergeleitet werden.</p>
+                    </div>
+                    <div class="bg-slate-800 p-4 rounded-lg">
+                        <h4 class="font-bold text-white mb-1">👀 4-Augen-Prinzip</h4>
+                        <p class="text-slate-300 text-sm">Digitaler Approval-Workflow. Keine Zahlung verlässt ungesehen von 2 Gründern das Haus.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 2: AR / AP ================= -->
+        <section id="sec-ar-ap" class="tab-content">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">2. Organisation: Rechnungen & Freigaben</h2>
+                <p class="text-lg text-slate-600">Das operative Herzstück. Wir schreiben Rechnungen in Word und verpassen Eingangsrechnungen. Diese Interaktion zeigt auf, wie wir diesen Prozess nach der 80-20-Regel sofort digitalisieren.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                
+                <!-- Ausgangsrechnungen -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">A. Ausgangsrechnungen (AR)</h3>
+                    
+                    <div id="ar-state-bad" class="bg-red-50 border border-red-200 rounded-lg p-5 mb-4">
+                        <div class="flex items-center gap-3 mb-2 text-red-700 font-bold">
+                            <span class="text-2xl">❌</span> Das Problem: Word
+                        </div>
+                        <p class="text-sm text-red-800 mb-3">Rechnungen in Word zu schreiben ist fehleranfällig. Pflichtangaben nach §14 UStG fehlen oft. Kein Mahnwesen existent.</p>
+                        <button onclick="toggleProcess('ar')" class="bg-slate-800 text-white text-sm font-bold py-2 px-4 rounded w-full hover:bg-slate-700">Lösung implementieren ➔</button>
+                    </div>
+
+                    <div id="ar-state-good" class="bg-emerald-50 border border-emerald-200 rounded-lg p-5 mb-4 hidden">
+                        <div class="flex items-center gap-3 mb-2 text-emerald-700 font-bold">
+                            <span class="text-2xl">✅</span> Die Lösung: Cloud-Tool
+                        </div>
+                        <ul class="text-sm text-emerald-800 space-y-2 mb-3">
+                            <li><strong>Striktes Word-Verbot</strong> ab heute!</li>
+                            <li>Einführung von <strong>Lexoffice</strong> oder <strong>sevDesk</strong>.</li>
+                            <li>Rechnungen sind automatisch <strong>§14 UStG-konform</strong>.</li>
+                            <li><strong>Automatisiertes Mahnwesen</strong> erinnert säumige Kunden.</li>
+                        </ul>
+                        <button onclick="toggleProcess('ar')" class="text-slate-500 text-xs underline">Rückgängig (Nur Demo)</button>
+                    </div>
+                </div>
+
+                <!-- Eingangsrechnungen -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">B. Eingangsrechnungen (ER)</h3>
+                    
+                    <div id="ap-state-bad" class="bg-red-50 border border-red-200 rounded-lg p-5 mb-4">
+                        <div class="flex items-center gap-3 mb-2 text-red-700 font-bold">
+                            <span class="text-2xl">❌</span> Das Problem: E-Mail Chaos
+                        </div>
+                        <p class="text-sm text-red-800 mb-3">Rechnungen verschimmeln unentdeckt in diversen privaten Postfächern. Falsche Rechnungsempfänger werden zu spät erkannt.</p>
+                        <button onclick="toggleProcess('ap')" class="bg-slate-800 text-white text-sm font-bold py-2 px-4 rounded w-full hover:bg-slate-700">Lösung implementieren ➔</button>
+                    </div>
+
+                    <div id="ap-state-good" class="bg-emerald-50 border border-emerald-200 rounded-lg p-5 mb-4 hidden">
+                        <div class="flex items-center gap-3 mb-2 text-emerald-700 font-bold">
+                            <span class="text-2xl">✅</span> Die Lösung: Zentralisierung
+                        </div>
+                        <ul class="text-sm text-emerald-800 space-y-2 mb-3">
+                            <li>Einrichtung von <strong>invoices@ecotech.de</strong>.</li>
+                            <li>Ausnahmslos ALLE Rechnungen gehen dorthin.</li>
+                            <li>Zwingender <strong>Approval-Workflow</strong> vor jeder Zahlung.</li>
+                            <li><strong>Vorab-Prüfung</strong> der Rechnungsadressen garantiert.</li>
+                        </ul>
+                        <button onclick="toggleProcess('ap')" class="text-slate-500 text-xs underline">Rückgängig (Nur Demo)</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 3: SPEND & CARDS ================= -->
+        <section id="sec-spend" class="tab-content">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">3. Spesen & Firmenkreditkarten</h2>
+                <p class="text-lg text-slate-600">Dieser Bereich beinhaltet aktuell unser größtes operatives Sicherheitsrisiko. Wir beenden die Zettelwirtschaft und sichern unsere Finanzen ab.</p>
+            </div>
+
+            <!-- HUGE ALERT BOX -->
+            <div id="security-alert" class="bg-red-600 text-white rounded-2xl shadow-lg p-8 mb-8 border-4 border-red-800 animate-pulse transition-all duration-500">
+                <div class="flex flex-col md:flex-row items-center gap-6">
+                    <div class="text-7xl">🚨</div>
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-black mb-2 uppercase tracking-wide">Kritische Sicherheitslücke!</h3>
+                        <p class="text-red-100 text-lg mb-2">Unsere Firmenkreditkarten-Daten liegen aktuell als <strong>Klartext für jeden einsehbar im GDrive</strong>. Reisekosten werden ineffizient formlos per E-Mail eingereicht.</p>
+                        <p class="font-bold text-white mb-4">Ein absolutes No-Go für die Due Diligence!</p>
+                        <button onclick="resolveSecurityRisk()" class="bg-white text-red-700 hover:bg-slate-100 font-black py-3 px-8 rounded-lg shadow-xl uppercase tracking-wider w-full md:w-auto">
+                            GDrive-Karte sofort sperren & System umstellen
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUCCESS BOX (Hidden initially) -->
+            <div id="security-resolved" class="bg-emerald-50 rounded-2xl shadow-sm border border-emerald-200 p-8 mb-8 hidden transition-all duration-500">
+                <div class="flex flex-col md:flex-row items-start gap-6">
+                    <div class="bg-emerald-100 p-4 rounded-full text-4xl">💳</div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-emerald-900 mb-3">Modernes Spend-Management aktiv</h3>
+                        <p class="text-emerald-800 mb-4">Die GDrive-Kreditkarte wurde erfolgreich gesperrt. Wir haben ein professionelles Spend-Management-Tool (z.B. Moss, Pleo oder Spendesk) eingeführt.</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-white p-4 rounded-lg border border-emerald-100 shadow-sm">
+                                <div class="font-bold text-slate-800 mb-1">📱 Belege per App</div>
+                                <p class="text-xs text-slate-500">Mitarbeiter fotografieren Spesen und Belege einfach in 10 Sekunden. Kein E-Mail-Ping-Pong mehr.</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg border border-emerald-100 shadow-sm">
+                                <div class="font-bold text-slate-800 mb-1">🎯 Virtuelle Budgets</div>
+                                <p class="text-xs text-slate-500">Jeder berechtigte Mitarbeiter erhält eigene virtuelle Karten mit harten Limits. 100% Kontrolle.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 4: ACCOUNTING & TAX ================= -->
+        <section id="sec-accounting" class="tab-content">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">4. Struktur des Rechnungswesens & Steuerberater</h2>
+                <p class="text-lg text-slate-600">Unser Fundament muss ausgetauscht werden. Falsche Loyalitäten zum aktuellen Steuerberater kosten uns möglicherweise die Millionen-Finanzierung. Wir etablieren einen 100% digitalen Prozess.</p>
+            </div>
+
+            <!-- Process Flow -->
+            <div class="relative py-8">
+                <!-- Vertical Line -->
+                <div class="hidden md:block absolute left-1/2 transform -translate-x-1/2 w-1 bg-blue-200 h-full top-0"></div>
+                
+                <div class="space-y-12">
+                    <!-- Step 1 -->
+                    <div class="flex flex-col md:flex-row items-center justify-between w-full relative">
+                        <div class="md:w-5/12 mb-4 md:mb-0">
+                            <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-red-500">
+                                <h4 class="font-bold text-lg text-slate-800 mb-2">Die harte Entscheidung</h4>
+                                <p class="text-sm text-slate-600">Wir trennen uns sofort vom aktuellen Handwerker-Steuerberater. Bei einer Series A über 3 Mio. € hat falsche Loyalität keinen Platz.</p>
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 md:translate-y-0 rounded-full bg-blue-600 border-4 border-white flex items-center justify-center text-white font-bold z-10">1</div>
+                        <div class="md:w-5/12">
+                            <div class="bg-blue-50 p-6 rounded-xl shadow-md border-l-4 border-blue-500">
+                                <h4 class="font-bold text-lg text-slate-800 mb-2">Neues Set-up</h4>
+                                <p class="text-sm text-slate-600">Wechsel zu einer digital aufgestellten, Start-up-erfahrenen Kanzlei, die proaktiv im Hinblick auf unsere Due Diligence agiert.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="flex flex-col md:flex-row-reverse items-center justify-between w-full relative">
+                        <div class="md:w-5/12 mb-4 md:mb-0">
+                            <div class="bg-white p-6 rounded-xl shadow-md border-r-4 border-red-500 md:text-right">
+                                <h4 class="font-bold text-lg text-slate-800 mb-2">Schluss mit Papier!</h4>
+                                <p class="text-sm text-slate-600">Physische Pendelordner, bei denen regelmäßig wichtige Belege fehlen, gehören ab heute der Vergangenheit an.</p>
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 md:translate-y-0 rounded-full bg-blue-600 border-4 border-white flex items-center justify-center text-white font-bold z-10">2</div>
+                        <div class="md:w-5/12">
+                            <div class="bg-blue-50 p-6 rounded-xl shadow-md border-r-4 border-blue-500 md:text-right">
+                                <h4 class="font-bold text-lg text-slate-800 mb-2">100% Digitale Buchhaltung</h4>
+                                <p class="text-sm text-slate-600">Einführung von <strong>DATEV Unternehmen online</strong>. Belegübergabe automatisiert über Schnittstellen aus Lexoffice & Pleo.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="flex flex-col md:flex-row items-center justify-between w-full relative">
+                        <div class="md:w-5/12 mb-4 md:mb-0">
+                            <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-red-500">
+                                <h4 class="font-bold text-lg text-slate-800 mb-2">Ende der Excel-Illusionen</h4>
+                                <p class="text-sm text-slate-600">Unser Reporting darf nicht länger losgelöst von der echten Buchhaltung existieren, sonst erkennen wir uns in den Zahlen nicht wieder.</p>
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 md:translate-y-0 rounded-full bg-emerald-500 border-4 border-white flex items-center justify-center text-white font-bold z-10">3</div>
+                        <div class="md:w-5/12">
+                            <div class="bg-emerald-50 p-6 rounded-xl shadow-md border-l-4 border-emerald-500">
+                                <h4 class="font-bold text-lg text-emerald-900 mb-2">Monatsabschluss (Fast Close)</h4>
+                                <p class="text-sm text-emerald-800">Controlling wird zwingend mit den echten BWA-Daten verknüpft. Fester Zeitplan garantiert monatlich belastbare, VC-konforme Finanzdaten.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 5: DATA ROOM & CONCLUSION ================= -->
+        <section id="sec-dataroom" class="tab-content">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">5. Investor Readiness: Data Room & Fazit</h2>
+                <p class="text-lg text-slate-600">Der letzte Schritt. Das Sammelsurium in privaten Postfächern stoppt. Wir bauen den digitalen Tresor auf, den der Lead-Investor bei der Due Diligence erwartet.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <!-- Data Room Interactive Demo -->
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <div class="flex items-center gap-3 mb-6 border-b pb-4">
+                        <div class="text-3xl">🔒</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800">Der digitale Datenraum (z.B. DocSend)</h3>
+                            <p class="text-xs text-slate-500">Klicken Sie auf die Ordner, um die VC-konforme Struktur zu erkunden.</p>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Folder Structure -->
+                    <div class="font-mono text-sm space-y-2 select-none">
+                        <!-- Folder 1 -->
+                        <div>
+                            <div class="flex items-center gap-2 cursor-pointer hover:bg-slate-100 p-2 rounded text-slate-800 font-bold" onclick="toggleFolder('f1')">
+                                <span id="icon-f1">📁</span> 01_Corporate_&_Governance
+                            </div>
+                            <div id="content-f1" class="ml-6 mt-1 hidden text-slate-600 space-y-1 border-l-2 border-slate-200 pl-3">
+                                <div class="hover:text-blue-600 cursor-default">📄 01.01_Handelsregisterauszug_Satzung.pdf</div>
+                                <div class="hover:text-blue-600 cursor-default">📄 01.02_Gesellschafterliste_CapTable.xlsx</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Folder 2 -->
+                        <div>
+                            <div class="flex items-center gap-2 cursor-pointer hover:bg-slate-100 p-2 rounded text-slate-800 font-bold" onclick="toggleFolder('f2')">
+                                <span id="icon-f2">📂</span> 02_Finance_&_Taxes
+                            </div>
+                            <!-- Open by default for demo -->
+                            <div id="content-f2" class="ml-6 mt-1 block text-slate-600 space-y-1 border-l-2 border-slate-200 pl-3">
+                                <div class="hover:text-blue-600 cursor-default bg-blue-50 text-blue-800 p-1 rounded">📄 02.01_Monatliche_BWAs_aus_DATEV.pdf</div>
+                                <div class="hover:text-blue-600 cursor-default p-1">📄 02.02_Steuerbescheide_Historie.pdf</div>
+                                <div class="hover:text-blue-600 cursor-default p-1">📄 02.03_Integrierte_Finanzplanung.xlsx</div>
+                            </div>
+                        </div>
+
+                        <!-- Folder 3 -->
+                        <div>
+                            <div class="flex items-center gap-2 cursor-pointer hover:bg-slate-100 p-2 rounded text-slate-800 font-bold" onclick="toggleFolder('f3')">
+                                <span id="icon-f3">📁</span> 03_Human_Resources
+                            </div>
+                            <div id="content-f3" class="ml-6 mt-1 hidden text-slate-600 space-y-1 border-l-2 border-slate-200 pl-3">
+                                <div class="hover:text-blue-600 cursor-default">📄 03.01_Geschäftsführerverträge.pdf</div>
+                                <div class="hover:text-blue-600 cursor-default">📄 03.02_Arbeitsverträge_Team.pdf</div>
+                            </div>
+                        </div>
+
+                        <!-- Folder 4 -->
+                        <div>
+                            <div class="flex items-center gap-2 cursor-pointer hover:bg-slate-100 p-2 rounded text-slate-800 font-bold" onclick="toggleFolder('f4')">
+                                <span id="icon-f4">📁</span> 04_Commercial_Contracts
+                            </div>
+                            <div id="content-f4" class="ml-6 mt-1 hidden text-slate-600 space-y-1 border-l-2 border-slate-200 pl-3">
+                                <div class="hover:text-blue-600 cursor-default">📄 04.01_Kunden_Rahmenverträge.pdf</div>
+                                <div class="hover:text-blue-600 cursor-default">📄 04.02_Lieferanten_IT_Lizenzen.pdf</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Call to Action / Conclusion -->
+                <div class="bg-gradient-to-br from-blue-900 to-slate-900 rounded-2xl shadow-xl p-6 text-white flex flex-col">
+                    <h3 class="text-2xl font-bold mb-4 text-emerald-400">Das 3-Millionen-Ticket</h3>
+                    <p class="text-slate-300 text-sm mb-4">Dieser 5-Schritte-Fahrplan ist keine lästige Bürokratie, sondern die <strong>einzig logische Brücke</strong> zu unserem Wachstumskapital.</p>
+                    
+                    <div class="bg-white/10 p-4 rounded-lg mb-6 backdrop-blur-sm">
+                        <h4 class="font-bold text-white mb-2 text-sm uppercase tracking-wider">Mein Appell als CFO</h4>
+                        <p class="text-sm text-slate-200 italic">"Ich treibe diesen Prozess gnadenlos voran. Aber ich brauche ab heute euer 100%iges Buy-in. Keine Ausnahmen. Lasst uns die Fehler der Vergangenheit hinter uns lassen!"</p>
+                    </div>
+
+                    <button onclick="alert('Roadmap akzeptiert! Das Projekt DD-Readiness startet heute.')" class="mt-auto bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-4 px-6 rounded-lg transition-colors shadow-[0_0_15px_rgba(16,185,129,0.5)] w-full text-center text-lg uppercase tracking-wide">
+                        Roadmap bestätigen
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Script Logic -->
+    <script>
+        // State Management
+        let currentView = 'dashboard';
+        let burnChartInstance = null;
+
+        // Navigation Function
+        function navigate(tabId) {
+            // Update mobile menu if open
+            const sidebar = document.getElementById('sidebar');
+            if(window.innerWidth < 768 && !sidebar.classList.contains('hidden')) {
+                sidebar.classList.add('hidden');
+            }
+
+            // Hide all sections
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('bg-blue-600', 'text-white', 'font-medium');
+                el.classList.add('text-slate-300');
+            });
+
+            // Show selected section
+            document.getElementById('sec-' + tabId).classList.add('active');
+            
+            // Highlight selected nav button
+            const activeBtn = document.getElementById('nav-' + tabId);
+            activeBtn.classList.remove('text-slate-300');
+            activeBtn.classList.add('bg-blue-600', 'text-white', 'font-medium');
+
+            currentView = tabId;
+
+            // Trigger animations/charts based on view
+            if(tabId === 'dashboard' && !burnChartInstance) {
+                renderChart();
+            }
+        }
+
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden');
+        });
+
+        // Chart.js Implementation for The Burning Platform
+        function renderChart() {
+            const ctx = document.getElementById('burnChart').getContext('2d');
+            
+            // Data calculation (Starting at approx 400k to show 5 months to 0 at 80k burn)
+            const labels = ['Heute', 'Monat 1', 'Monat 2', 'Monat 3', 'Monat 4', 'Monat 5 (Ende)'];
+            const data = [400000, 320000, 240000, 160000, 80000, 0];
+
+            burnChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Verfügbare Liquidität (€)',
+                        data: data,
+                        borderColor: 'rgba(220, 38, 38, 1)', // Tailwind red-600
+                        backgroundColor: 'rgba(254, 226, 226, 0.5)', // Tailwind red-100
+                        borderWidth: 3,
+                        pointBackgroundColor: 'rgba(220, 38, 38, 1)',
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // CRITICAL for chart container limits
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value / 1000 + 'k €';
+                                }
+                            },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Process Interactive Toggles (Section 2)
+        function toggleProcess(type) {
+            const badEl = document.getElementById(`${type}-state-bad`);
+            const goodEl = document.getElementById(`${type}-state-good`);
+            
+            if (badEl.classList.contains('hidden')) {
+                badEl.classList.remove('hidden');
+                goodEl.classList.add('hidden');
+            } else {
+                badEl.classList.add('hidden');
+                goodEl.classList.remove('hidden');
+            }
+        }
+
+        // Security Alert Resolution (Section 3)
+        function resolveSecurityRisk() {
+            const alertBox = document.getElementById('security-alert');
+            const successBox = document.getElementById('security-resolved');
+            
+            alertBox.style.opacity = '0';
+            setTimeout(() => {
+                alertBox.classList.add('hidden');
+                successBox.classList.remove('hidden');
+                // trigger a reflow to restart animation
+                void successBox.offsetWidth;
+                successBox.style.opacity = '1';
+            }, 500);
+        }
+
+        // Data Room Folder Toggle (Section 5)
+        function toggleFolder(folderId) {
+            const content = document.getElementById('content-' + folderId);
+            const icon = document.getElementById('icon-' + folderId);
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                content.classList.add('block');
+                icon.textContent = '📂';
+            } else {
+                content.classList.add('hidden');
+                content.classList.remove('block');
+                icon.textContent = '📁';
+            }
+        }
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            // Initial render of chart if on dashboard
+            if(currentView === 'dashboard') {
+                renderChart();
+            }
+        });
+    </script>
+</body>
+</html>
